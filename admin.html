@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>관리자 페이지</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>관리자 페이지</h1>
+    <button onclick="sendPing()">Ping!</button>
+    <h2>접속 클라이언트 목록</h2>
+    <table id="clientTable">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>이름</th>
+            </tr>
+        </thead>
+        <tbody id="clientList"></tbody>
+    </table>
+
+    <script>
+        const socket = new WebSocket('ws://' + window.location.host);
+
+        socket.onmessage = function (event) {
+            if (event.data === 'updateClients') {
+                fetchClientList();
+            }
+        };
+
+        function sendPing() {
+            fetch('/ping', { method: 'POST' })
+                .then(response => response.text())
+                .then(result => console.log(result));
+
+            fetchClientList();
+        }
+
+        function fetchClientList() {
+            fetch('/clients', {
+                cache: 'no-store'
+            })
+                .then(response => response.json())
+                .then(clients => {
+                    const clientList = document.getElementById('clientList');
+                    clientList.innerHTML = '';
+                    clients.forEach((client, index) => {
+                        const row = clientList.insertRow();
+                        row.insertCell(0).textContent = index + 1;
+                        row.insertCell(1).textContent = client.name;
+                    });
+                });
+        }
+
+        fetchClientList(); // 페이지 로드 시 클라이언트 목록 가져오기
+    </script>
+</body>
+
+</html>
