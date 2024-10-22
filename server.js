@@ -17,6 +17,13 @@ wss.on('connection', (ws, req) => {
     const ip = req.socket.remoteAddress;
     console.log(`새로운 클라이언트 접속: ${ip}`);
 
+    // 핑-퐁 간격 설정 (30초)
+    const pingInterval = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.ping();
+        }
+    }, 30000);
+
     ws.on('message', (message) => {
         console.log('받은 메시지:', message.toString());
         try {
@@ -25,6 +32,8 @@ wss.on('connection', (ws, req) => {
                 console.log(`클라이언트 이름: ${data.name} (IP: ${ip})`);
                 clients.set(ws, { name: data.name, ip: ip });
                 broadcastClientUpdate();
+            } else if (data.type === 'pong') {
+                console.log('Pong received from client');
             }
         } catch (error) {
             console.error('메시지 파싱 오류:', error);
@@ -32,8 +41,13 @@ wss.on('connection', (ws, req) => {
     });
 
     ws.on('close', () => {
+        clearInterval(pingInterval);
         clients.delete(ws);
         broadcastClientUpdate();
+    });
+
+    ws.on('pong', () => {
+        console.log('Pong received from client');
     });
 });
 

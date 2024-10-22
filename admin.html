@@ -9,6 +9,26 @@
     <meta http-equiv="Expires" content="0">
     <title>관리자 페이지</title>
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #upper-half {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        #lower-half {
+            flex: 1;
+            overflow-y: auto;
+            border-top: 1px solid #ccc;
+            padding: 20px;
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -24,39 +44,69 @@
         th {
             background-color: #f2f2f2;
         }
+
+        #log {
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 
 <body>
-    <h1>관리자 페이지</h1>
-    <button onclick="sendPing()">Ping!</button>
-    <h2>접속 클라이언트 목록</h2>
-    <table id="clientTable">
-        <thead>
-            <tr>
-                <th>Number</th>
-                <th>이름</th>
-            </tr>
-        </thead>
-        <tbody id="clientList"></tbody>
-    </table>
+    <div id="upper-half">
+        <h1>관리자 페이지</h1>
+        <button onclick="sendPing()">Ping!</button>
+        <h2>접속 클라이언트 목록</h2>
+        <p id="lastUpdate">Updated: 0 seconds ago</p>
+        <table id="clientTable">
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>이름</th>
+                </tr>
+            </thead>
+            <tbody id="clientList"></tbody>
+        </table>
+    </div>
+    <div id="lower-half">
+        <h2>웹소켓 로그</h2>
+        <div id="log"></div>
+    </div>
 
     <script>
         const socket = new WebSocket('ws://' + window.location.host);
+        let lastUpdateTime = new Date();
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const diff = Math.floor((now - lastUpdateTime) / 1000);
+            document.getElementById('lastUpdate').textContent = `Updated: ${diff} seconds ago`;
+        }
+
+        function log(clientName, message) {
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            const logElement = document.getElementById('log');
+            logElement.innerHTML += `${timestamp} [${clientName}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        socket.onopen = function () {
+            log('서버', '웹소켓 연결 성공');
+        };
 
         socket.onmessage = function (event) {
             if (event.data === 'updateClients') {
                 fetchClientList();
+                log('서버', '클라이언트 목록 업데이트');
+            } else {
+                log('서버', `메시지 수신: ${event.data}`);
             }
         };
 
-        function sendPing() {
-            fetch('/ping', { method: 'POST' })
-                .then(response => response.text())
-                .then(result => console.log(result));
-
-            fetchClientList();
-        }
+        socket.onclose = function () {
+            log('서버', 'WebSocket 연결이 닫혔습니다.');
+        };
 
         function fetchClientList() {
             fetch('/clients', {
@@ -68,13 +118,34 @@
                     clientList.innerHTML = '';
                     clients.forEach((client, index) => {
                         const row = clientList.insertRow();
-                        row.insertCell(0).textContent = index + 1;
-                        row.insertCell(1).textContent = client.name;
+                        const cellNumber = row.insertCell(0);
+                        const cellName = row.insertCell(1);
+                        cellNumber.textContent = index + 1;
+                        cellName.textContent = client.name;
                     });
+                    lastUpdateTime = new Date();
+                    updateLastUpdateTime();
+                    //log('서버', '클라이언트 목록 업데이트 완료');
                 });
         }
 
-        fetchClientList(); // 페이지 로드 시 클라이언트 목록 가져오기
+        function sendPing() {
+            fetch('/ping', { method: 'POST' })
+                .then(response => response.text())
+                .then(result => {
+                    console.log(result);
+                    log('서버', 'Ping 메시지 전송');
+                });
+        }
+
+        // 페이지 로드 시 초기 클라이언트 목록 가져오기
+        fetchClientList();
+
+        // 3초마다 클라이언트 목록 업데이트
+        setInterval(fetchClientList, 3000);
+
+        // 1초마다 마지막 업데이트 시간 갱신
+        setInterval(updateLastUpdateTime, 1000);
     </script>
 </body>
 
