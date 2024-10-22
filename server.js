@@ -28,10 +28,22 @@ wss.on('connection', (ws, req) => {
         console.log('받은 메시지:', message.toString());
         try {
             const data = JSON.parse(message);
-            if (data.type === 'name') {
-                console.log(`클라이언트 이름: ${data.name} (IP: ${ip})`);
-                clients.set(ws, { name: data.name, ip: ip });
+            if (data.type === 'register') {
+                console.log(`클라이언트 UUID: ${data.deviceId} (IP: ${ip})`);
+                clients.set(ws, { name: data.deviceId, ip: ip });
                 broadcastClientUpdate();
+
+                // 인덱스 번호에 따라 문자 전송
+                const index = clients.size % 3;
+                let charToSend;
+                if (index === 1) {
+                    charToSend = 'A';
+                } else if (index === 2) {
+                    charToSend = 'B';
+                } else {
+                    charToSend = 'C';
+                }
+                ws.send(charToSend); // 클라이언트에게 문자 전송
             } else if (data.type === 'pong') {
                 console.log('Pong received from client');
             }
