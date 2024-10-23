@@ -87,6 +87,15 @@ app.get('/clients', (req, res) => {
     res.json(clientList);
 });
 
+app.post('/sendSceneMessage', (req, res) => {
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send('Scene1'); // 모든 클라이언트에게 'Scene1' 메시지 전송
+        }
+    });
+    res.send('모든 클라이언트에게 Scene1 메시지 전송 완료');
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);

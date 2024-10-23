@@ -139,9 +139,12 @@
         }
 
         function sendSceneMessage() {
-            const message = 'Scene1';
-            socket.send(message); // 모든 클라이언트에게 메시지 전송
-            log('서버', '모든 클라이언트에게 Scene1 메시지 전송');
+            fetch('/sendSceneMessage', { method: 'POST' }) // 서버에 요청 전송
+                .then(response => response.text())
+                .then(result => {
+                    console.log(result);
+                    log('서버', '모든 클라이언트에게 Scene1 메시지 전송 요청');
+                });
         }
 
         // 페이지 로드 시 초기 클라이언트 목록 가져오기
