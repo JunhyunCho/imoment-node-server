@@ -56,6 +56,7 @@
     <div id="upper-half">
         <h1>관리자 페이지 new!!</h1>
         <button onclick="sendPing()">Ping!</button>
+        <button onclick="sendSceneMessage()">Enter</button>
         <h2>접속 클라이언트 목록</h2>
         <p id="lastUpdate">Updated: 0 seconds ago</p>
         <table id="clientTable">
@@ -125,7 +126,6 @@
                     });
                     lastUpdateTime = new Date();
                     updateLastUpdateTime();
-                    //log('서버', '클라이언트 목록 업데이트 완료');
                 });
         }
 
@@ -136,6 +136,12 @@
                     console.log(result);
                     log('서버', 'Ping 메시지 전송');
                 });
+        }
+
+        function sendSceneMessage() {
+            const message = 'Scene1';
+            socket.send(message); // 모든 클라이언트에게 메시지 전송
+            log('서버', '모든 클라이언트에게 Scene1 메시지 전송');
         }
 
         // 페이지 로드 시 초기 클라이언트 목록 가져오기
