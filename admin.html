@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>관리자 페이지</title>
+    <title>잉여의 도시 Admin</title>
     <style>
         body {
             display: flex;
@@ -39,6 +39,7 @@
             border: 1px solid black;
             padding: 8px;
             text-align: left;
+            max-width: 200px;
         }
 
         th {
@@ -54,7 +55,7 @@
 
 <body>
     <div id="upper-half">
-        <h1>관리자 페이지 new!!</h1>
+        <h1>잉여의 도시 admin</h1>
         <button onclick="sendPing()">Ping!</button>
         <button onclick="sendSceneMessage()">Enter</button>
         <h2>접속 클라이언트 목록</h2>
@@ -62,8 +63,10 @@
         <table id="clientTable">
             <thead>
                 <tr>
-                    <th>Number</th>
-                    <th>이름</th>
+                    <th style="width: 100px;">Number</th>
+                    <th style="width: 100px;">UUID</th>
+                    <th style="width: 100px;">접속시간</th>
+                    <th style="width: 100px;">Index</th>
                 </tr>
             </thead>
             <tbody id="clientList"></tbody>
@@ -121,8 +124,12 @@
                         const row = clientList.insertRow();
                         const cellNumber = row.insertCell(0);
                         const cellName = row.insertCell(1);
+                        const cellTime = row.insertCell(2);
+                        const cellIndex = row.insertCell(3);
                         cellNumber.textContent = index + 1;
                         cellName.textContent = client.name;
+                        cellTime.textContent = client.connectionTime;
+                        cellIndex.textContent = client.index;
                     });
                     lastUpdateTime = new Date();
                     updateLastUpdateTime();
