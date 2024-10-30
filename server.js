@@ -88,7 +88,8 @@ wss.on('connection', (ws, req) => {
     });
 
     ws.on('pong', () => {
-        console.log('Pong received from client');
+        const clientInfo = clients.get(ws);
+        console.log(`Pong received from client ${clientInfo.name} (Group: ${clientInfo.index})`);
     });
 });
 

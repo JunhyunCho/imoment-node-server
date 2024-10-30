@@ -22,13 +22,6 @@
             padding: 20px;
         }
 
-        #lower-half {
-            flex: 1;
-            overflow-y: auto;
-            border-top: 1px solid #ccc;
-            padding: 20px;
-        }
-
         table {
             border-collapse: collapse;
             width: 100%;
@@ -44,11 +37,6 @@
 
         th {
             background-color: #f2f2f2;
-        }
-
-        #log {
-            font-family: monospace;
-            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -72,10 +60,6 @@
             <tbody id="clientList"></tbody>
         </table>
     </div>
-    <div id="lower-half">
-        <h2>웹소켓 로그</h2>
-        <div id="log"></div>
-    </div>
 
     <script>
         const socket = new WebSocket('ws://' + window.location.host);
@@ -87,29 +71,21 @@
             document.getElementById('lastUpdate').textContent = `Updated: ${diff} seconds ago`;
         }
 
-        function log(clientName, message) {
-            const now = new Date();
-            const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-            const logElement = document.getElementById('log');
-            logElement.innerHTML += `${timestamp} [${clientName}] ${message}\n`;
-            logElement.scrollTop = logElement.scrollHeight;
-        }
-
         socket.onopen = function () {
-            log('서버', '웹소켓 연결 성공');
+            console.log('웹소켓 연결 성공');
         };
 
         socket.onmessage = function (event) {
             if (event.data === 'updateClients') {
                 fetchClientList();
-                log('서버', '클라이언트 목록 업데이트');
+                console.log('클라이언트 목록 업데이트');
             } else {
-                log('서버', `메시지 수신: ${event.data}`);
+                console.log(`메시지 수신: ${event.data}`);
             }
         };
 
         socket.onclose = function () {
-            log('서버', 'WebSocket 연결이 닫혔습니다.');
+            console.log('WebSocket 연결이 닫혔습니다.');
         };
 
         function fetchClientList() {
@@ -141,7 +117,7 @@
                 .then(response => response.text())
                 .then(result => {
                     console.log(result);
-                    log('서버', 'Ping 메시지 전송');
+                    console.log('서버', 'Ping 메시지 전송');
                 });
         }
 
@@ -150,7 +126,7 @@
                 .then(response => response.text())
                 .then(result => {
                     console.log(result);
-                    log('서버', '모든 클라이언트에게 Scene1 메시지 전송 요청');
+                    console.log('서버', '모든 클라이언트에게 Scene1 메시지 전송 요청');
                 });
         }
 
