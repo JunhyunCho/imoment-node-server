@@ -17,8 +17,14 @@ wss.on('connection', (ws, req) => {
     const ip = req.socket.remoteAddress;
     console.log(`새로운 클라이언트 접속: ${ip}`);
 
-    // 접속 시간 추가
-    const connectionTime = new Date().toLocaleTimeString();
+    // 접속 시간 추가 (한국 시간 GMT+9)
+    const connectionTime = new Date().toLocaleString('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
 
     // 핑-퐁 간격 설정 (30초)
     const pingInterval = setInterval(() => {
